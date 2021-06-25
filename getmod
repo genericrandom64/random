@@ -1,0 +1,24 @@
+# get stuff off modarchive
+getmodid() {
+SONG=$1
+curl -s https://modarchive.org/index.php\?request=search\&query=$SONG\&submit=Find\&search_type=filename_or_songtitle | sed 's/?/ /g' | sed 's/ /\n/g' | grep moduleid= | sed 's/#.*//' | sed 's/moduleid=//g' | xargs | awk '{print $1}'
+}
+getmodname() {
+ID=$1
+curl -s https://modarchive.org/index.php\?request=view_by_moduleid\&query=$ID | sed 's/span/\n/g' | grep module-sub-header | sed 's/).*//' | sed 's/.*(//'
+}
+getmodinfo() {
+ID=$1
+if [[ $# -eq 1 ]]; then
+curl https://modarchive.org/index.php\?request=view_by_moduleid\&query=$ID | grep -A 8 Info | grep li | grep -v 'ul class=' | sed 's/<li class="stats">//g' | sed 's/<\/li>//g' | sed "s/<b>/$(printf '\033')[1m/g" | sed "s/<\/b>/$(printf '\033')[0m/g" | grep -v , | sed 's/ //g' | sed 's/times//g' | sed 's/:/ /g' | sed 's/ModArchive//g'
+else
+DATA=$2
+curl https://modarchive.org/index.php\?request=view_by_moduleid\&query=$ID | grep -A 8 Info | grep li | grep -v 'ul class=' | sed 's/<li class="stats">//g' | sed 's/<\/li>//g' | sed "s/<b>/$(printf '\033')[1m/g" | sed "s/<\/b>/$(printf '\033')[0m/g" | grep -v , | sed 's/ //g' | sed 's/times//g' | sed 's/:/ /g' | sed 's/ModArchive//g' | grep $DATA | awk '{print $2}'
+fi
+}
+fetchid=$(getmodid $1)
+fetchname=$(getmodname $fetchid)
+fetchinfo=$(getmodinfo $fetchid MD5)
+echo $fetchinfo
+wget https://api.modarchive.org/downloads.php\?moduleid=$fetchid -nv -O $fetchname
+xmp $fetchname

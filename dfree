@@ -1,0 +1,6 @@
+# formats btrfs filesystem usage
+DISKS=$(cat ~/dfree.conf)
+for i in $DISKS
+do echo -n $(doas btrfs filesystem usage $i -g | grep -E 'Free|Used' | grep -vE 'DUP|Data|fs' | xargs | awk '{print $1 " " $2 " " $3 " " $5}' | sed 's/://;s/GiB//g')
+echo " $i"
+done

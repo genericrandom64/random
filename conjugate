@@ -1,0 +1,2 @@
+phantomjs ~/projects/getconj.js $1 | sed -n '/bottom-horizontal/q;p' | sed ':a;N;$!ba;s/\n/NEWLINE/g' | sed 's/head.*\/head//;s/.*verb-forms-wrap/<a a="/;s/NEWLINE/\n/g;s/>/>\n/g;s/ </\n</g;s/  //g;s/^\s*//;' | grep -vE 'span|txt|div' | grep -ve '^$' | sed '/^ $/d;s/</\n</g;s/  //g;/^ $/d;' | grep -ve '^$' | grep -vE '<a|href|\/a>' | grep -v 'ul class' | grep -Fxv / | grep -Fxv : | grep -v '<!--' | grep -vE '<script|<\/script|<iframe|<\/iframe' | grep -Fxv '</i>' | grep -Fxv '</ul>' | sed ':a;N;$!ba;s/\n/ /g;' > /tmp/conj.html
+lynx /tmp/conj.html
